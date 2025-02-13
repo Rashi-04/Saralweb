@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Log Analysis Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+      }
+      canvas {
+        max-width: 600px;
+        margin: 20px auto;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Log Analysis Dashboard</h1>
+
+    <h3>IP Address Histogram</h3>
+    <canvas id="ipChart"></canvas>
+
+    <h3>Hourly Traffic</h3>
+    <canvas id="hourChart"></canvas>
+
+    <script>
+      async function fetchData() {
+        const response = await fetch("/logs");
+        const { ipSorted, hourlyCounts } = await response.json();
+
+        // IP Chart
+        const ipLabels = ipSorted.map((item) => item[0]);
+        const ipData = ipSorted.map((item) => item[1]);
+
+        new Chart(document.getElementById("ipChart"), {
+          type: "bar",
+          data: {
+            labels: ipLabels,
+            datasets: [
+              {
+                label: "Occurrences",
+                data: ipData,
+                backgroundColor: "blue",
+              },
+            ],
+          },
+        });
+
+        // Hourly Chart
+        new Chart(document.getElementById("hourChart"), {
+          type: "line",
+          data: {
+            labels: Array.from({ length: 24 }, (_, i) =>
+              i.toString().padStart(2, "0")
+            ),
+            datasets: [
+              {
+                label: "Visitors",
+                data: hourlyCounts,
+                borderColor: "red",
+                fill: false,
+              },
+            ],
+          },
+        });
+      }
+
+      fetchData();
+    </script>
+  </body>
+</html>
